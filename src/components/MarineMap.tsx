@@ -34,10 +34,11 @@ const MarineMap = ({ onHotspotSelect }: MarineMapProps) => {
     const map = L.map(mapContainerRef.current).setView([1.3521, 103.8198], 11);
     mapRef.current = map;
 
-    // Add water-focused tile layer
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
-      maxZoom: 13,
+    // Add minimalistic tile layer with clear water emphasis
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20,
     }).addTo(map);
 
     // Add markers for each hotspot
