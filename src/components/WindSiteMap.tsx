@@ -331,7 +331,7 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [], selectedSiteId }: 
       <div ref={mapContainerRef} className="h-full w-full" />
       
       {/* Layer Controls */}
-      <div className="absolute top-4 left-4 bg-card/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-border z-[1000]">
+      <div className="absolute top-4 right-4 bg-card/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-border z-[1000]">
         {showWind && currentDayData && (
           <>
             <div className="flex items-center gap-2 mb-2">
