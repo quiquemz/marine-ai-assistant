@@ -64,18 +64,32 @@ const WindSitePriorityPanel = ({ onSiteSelect, highlightedSiteIds = [] }: WindSi
   };
 
   if (highlightedSiteIds.length === 0) {
-    return null;
+    return (
+      <Card className="h-full flex flex-col">
+        <CardHeader className="flex-shrink-0 py-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <TrendingUp className="w-5 h-5" />
+            Search Results
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground text-center">
+            Ask the copilot to search for sites to see results here
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex-shrink-0 py-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <TrendingUp className="w-5 h-5" />
           Search Results ({prioritySites.length})
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1 overflow-auto">
         {prioritySites.map((site, index) => (
           <div
             key={site.id}
