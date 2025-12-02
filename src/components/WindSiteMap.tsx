@@ -82,7 +82,10 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [], selectedSiteId }: 
         overallScore: site.overall_score,
         lastAssessment: site.last_assessment,
         estimatedCapacity: site.estimated_capacity,
-        country: site.country
+        country: site.country,
+        distanceToPortKm: site.distance_to_port_km ?? undefined,
+        distanceToGridKm: site.distance_to_grid_km ?? undefined,
+        capexEurMPerMw: site.capex_eur_m_per_mw ?? undefined,
       }));
       
       setAllSites(sites);
@@ -127,7 +130,10 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [], selectedSiteId }: 
         overallScore: site.overall_score,
         lastAssessment: site.last_assessment,
         estimatedCapacity: site.estimated_capacity,
-        country: site.country
+        country: site.country,
+        distanceToPortKm: site.distance_to_port_km ?? undefined,
+        distanceToGridKm: site.distance_to_grid_km ?? undefined,
+        capexEurMPerMw: site.capex_eur_m_per_mw ?? undefined,
       }));
       
       setWindSites(sites);

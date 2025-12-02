@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type WindSite } from '@/data/windSiteData';
 import { Wind, TrendingUp, Anchor } from 'lucide-react';
-import { Badge } from './ui/badge';
+import FeasibilityTooltip from './FeasibilityTooltip';
 import { supabase } from '@/integrations/supabase/client';
 
 interface WindSitePriorityPanelProps {
@@ -46,6 +46,9 @@ const WindSitePriorityPanel = ({ onSiteSelect, highlightedSiteIds = [] }: WindSi
         lastAssessment: site.last_assessment,
         estimatedCapacity: site.estimated_capacity,
         country: site.country,
+        distanceToPortKm: site.distance_to_port_km ?? undefined,
+        distanceToGridKm: site.distance_to_grid_km ?? undefined,
+        capexEurMPerMw: site.capex_eur_m_per_mw ?? undefined,
       }));
 
       setPrioritySites(sites);
@@ -54,7 +57,7 @@ const WindSitePriorityPanel = ({ onSiteSelect, highlightedSiteIds = [] }: WindSi
     fetchPrioritySites();
   }, [highlightedSiteIds]);
 
-  const getFeasibilityBadgeVariant = (feasibility: string) => {
+  const getFeasibilityBadgeVariant = (feasibility: string): 'default' | 'secondary' | 'outline' | 'destructive' => {
     switch (feasibility) {
       case 'excellent': return 'default';
       case 'good': return 'secondary';
@@ -122,9 +125,7 @@ const WindSitePriorityPanel = ({ onSiteSelect, highlightedSiteIds = [] }: WindSi
             </div>
 
             <div className="flex items-center gap-2 mt-2 ml-8">
-              <Badge variant={getFeasibilityBadgeVariant(site.feasibility)} className="text-xs">
-                {site.feasibility}
-              </Badge>
+              <FeasibilityTooltip site={site} variant={getFeasibilityBadgeVariant(site.feasibility)} />
               <div className="text-xs">
                 <span className="text-muted-foreground">Score: </span>
                 <span className="font-bold text-primary">{site.overallScore}/100</span>
