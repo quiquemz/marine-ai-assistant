@@ -61,7 +61,7 @@ function searchSites(args: any) {
     results = results.filter(site => 
       site.name.toLowerCase().includes(queryLower) ||
       site.location.toLowerCase().includes(queryLower) ||
-      site.description.toLowerCase().includes(queryLower)
+      site.country.toLowerCase().includes(queryLower)
     );
   }
   
@@ -99,6 +99,7 @@ function searchSites(args: any) {
       environmental_impact: site.environmentalImpact,
       overall_score: site.overallScore,
       estimated_capacity_mw: site.estimatedCapacity,
+      last_assessment: site.lastAssessment,
       coordinates: site.coordinates
     }))
   };
@@ -120,7 +121,6 @@ function getSiteDetails(args: any) {
     id: site.id,
     name: site.name,
     location: site.location,
-    description: site.description,
     capacity_factor: site.capacityFactor,
     water_depth: site.waterDepth,
     feasibility: site.feasibility,
@@ -130,7 +130,9 @@ function getSiteDetails(args: any) {
     seafloor_impact: site.seaFloorImpact,
     overall_score: site.overallScore,
     estimated_capacity_mw: site.estimatedCapacity,
-    coordinates: site.coordinates
+    last_assessment: site.lastAssessment,
+    coordinates: site.coordinates,
+    country: site.country
   };
 }
 
