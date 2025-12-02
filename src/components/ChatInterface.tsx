@@ -19,7 +19,7 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your Marine Litter Management AI assistant. I can help you analyze coastal cleanup data, prioritize hotspots, and recommend cleanup strategies. How can I assist you today?'
+      content: 'Hello! I\'m your Floating Offshore Wind Planning Copilot for European seas. I can help you analyze potential wind farm sites, assess feasibility, evaluate environmental impacts, and guide your decision-making. How can I assist you today?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -34,7 +34,7 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
 
   useEffect(() => {
     if (selectedHotspot) {
-      setInput(`Tell me about ${selectedHotspot} and recommend a cleanup strategy.`);
+      setInput(`Tell me more about the ${selectedHotspot} wind site`);
     }
   }, [selectedHotspot]);
 
@@ -142,10 +142,10 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
       <div className="p-4 border-b border-border bg-primary/5">
         <div className="flex items-center gap-2">
           <Bot className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold text-lg">Marine AI Assistant</h2>
+          <h2 className="font-semibold text-lg">Wind Planning Copilot</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          Ask about hotspots, cleanup strategies, or data analysis
+          Ask about wind sites, feasibility, environmental trade-offs, or recommendations
         </p>
       </div>
 
@@ -200,7 +200,7 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about hotspots, strategies, or data..."
+            placeholder="Ask about wind sites, feasibility, environmental impacts, or recommendations..."
             disabled={isLoading}
             className="flex-1"
           />
