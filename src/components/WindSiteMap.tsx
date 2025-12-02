@@ -30,9 +30,15 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
 
   useEffect(() => {
     const fetchWindSites = async () => {
+      if (highlightedSiteIds.length === 0) {
+        setWindSites([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('wind_sites')
         .select('*')
+        .in('id', highlightedSiteIds)
         .order('overall_score', { ascending: false });
       
       if (error) {
@@ -62,10 +68,10 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
     };
     
     fetchWindSites();
-  }, []);
+  }, [highlightedSiteIds]);
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current || windSites.length === 0) return;
+    if (!mapContainerRef.current || mapRef.current) return;
 
     // Initialize map centered on European seas
     const map = L.map(mapContainerRef.current).setView([54.0, 3.0], 5);
@@ -84,7 +90,7 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
         mapRef.current = null;
       }
     };
-  }, [windSites]);
+  }, []);
 
   // Update markers when sites or highlighted IDs change
   useEffect(() => {
