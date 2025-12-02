@@ -7,47 +7,52 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface WindSitePriorityPanelProps {
   onSiteSelect?: (site: WindSite) => void;
+  highlightedSiteIds?: string[];
 }
 
-const WindSitePriorityPanel = ({ onSiteSelect }: WindSitePriorityPanelProps) => {
+const WindSitePriorityPanel = ({ onSiteSelect, highlightedSiteIds = [] }: WindSitePriorityPanelProps) => {
   const [prioritySites, setPrioritySites] = useState<WindSite[]>([]);
 
   useEffect(() => {
     const fetchPrioritySites = async () => {
+      if (highlightedSiteIds.length === 0) {
+        setPrioritySites([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('wind_sites')
         .select('*')
-        .order('overall_score', { ascending: false })
-        .limit(3);
-      
+        .in('id', highlightedSiteIds)
+        .order('overall_score', { ascending: false });
+
       if (error) {
         console.error('Error fetching priority sites:', error);
         return;
       }
-      
-      // Transform database format to WindSite format
-      const sites: WindSite[] = data.map(site => ({
+
+      const sites: WindSite[] = data.map((site) => ({
         id: site.id,
         name: site.name,
         coordinates: site.coordinates as [number, number],
         capacityFactor: site.capacity_factor,
         waterDepth: site.water_depth,
-        feasibility: site.feasibility as 'excellent' | 'good' | 'moderate' | 'challenging',
-        environmentalImpact: site.environmental_impact as 'low' | 'medium' | 'high' | 'critical',
-        birdMigrationRisk: site.bird_migration_risk as 'low' | 'medium' | 'high',
-        whaleMigrationRisk: site.whale_migration_risk as 'low' | 'medium' | 'high',
-        seaFloorImpact: site.sea_floor_impact as 'low' | 'medium' | 'high',
+        feasibility: site.feasibility as WindSite['feasibility'],
+        environmentalImpact: site.environmental_impact as WindSite['environmentalImpact'],
+        birdMigrationRisk: site.bird_migration_risk as WindSite['birdMigrationRisk'],
+        whaleMigrationRisk: site.whale_migration_risk as WindSite['whaleMigrationRisk'],
+        seaFloorImpact: site.sea_floor_impact as WindSite['seaFloorImpact'],
         overallScore: site.overall_score,
         lastAssessment: site.last_assessment,
         estimatedCapacity: site.estimated_capacity,
-        country: site.country
+        country: site.country,
       }));
-      
+
       setPrioritySites(sites);
     };
-    
+
     fetchPrioritySites();
-  }, []);
+  }, [highlightedSiteIds]);
 
   const getFeasibilityBadgeVariant = (feasibility: string) => {
     switch (feasibility) {
@@ -58,12 +63,16 @@ const WindSitePriorityPanel = ({ onSiteSelect }: WindSitePriorityPanelProps) => 
     }
   };
 
+  if (highlightedSiteIds.length === 0) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <TrendingUp className="w-5 h-5" />
-          Top Priority Sites
+          Search Results ({prioritySites.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
