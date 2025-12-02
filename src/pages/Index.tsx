@@ -7,10 +7,12 @@ import type { WindSite } from '@/data/windSiteData';
 
 const Index = () => {
   const [selectedHotspot, setSelectedHotspot] = useState<string>();
+  const [selectedSiteId, setSelectedSiteId] = useState<string>();
   const [highlightedSiteIds, setHighlightedSiteIds] = useState<string[]>([]);
 
   const handleSiteSelect = (site: WindSite) => {
     setSelectedHotspot(site.name);
+    setSelectedSiteId(site.id);
   };
 
   const handleHighlightSites = (siteIds: string[]) => {
@@ -54,6 +56,7 @@ const Index = () => {
             <WindSiteMap 
               onSiteSelect={handleSiteSelect} 
               highlightedSiteIds={highlightedSiteIds}
+              selectedSiteId={selectedSiteId}
             />
           </div>
 
