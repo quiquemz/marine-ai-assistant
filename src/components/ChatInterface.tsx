@@ -44,7 +44,7 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
     }
   }, [selectedHotspot]);
 
-  const streamChat = async (userMessage: Message) => {
+  const sendMessage = async (userMessage: Message) => {
     const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/marine-ai-chat`;
     
     try {
@@ -59,65 +59,29 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
 
       if (resp.status === 429) {
         toast.error('Rate limit exceeded. Please try again later.');
+        setIsLoading(false);
         return;
       }
       
       if (resp.status === 402) {
         toast.error('Service unavailable. Please contact support.');
+        setIsLoading(false);
         return;
       }
 
-      if (!resp.ok || !resp.body) {
-        throw new Error('Failed to start stream');
+      if (!resp.ok) {
+        throw new Error('Failed to get response');
       }
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = '';
-      let assistantContent = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") {
-            setIsLoading(false);
-            return;
-          }
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              assistantContent += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === 'assistant') {
-                  return prev.map((m, i) => 
-                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
-                  );
-                }
-                return [...prev, { role: 'assistant', content: assistantContent }];
-              });
-            }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
-        }
+      const data = await resp.json();
+      
+      if (data.content) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.content }]);
+      } else if (data.error) {
+        toast.error(data.error);
       }
+      
+      setIsLoading(false);
     } catch (error) {
       console.error('Chat error:', error);
       toast.error('Failed to send message. Please try again.');
@@ -133,7 +97,7 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
     setInput('');
     setIsLoading(true);
 
-    await streamChat(userMessage);
+    await sendMessage(userMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
