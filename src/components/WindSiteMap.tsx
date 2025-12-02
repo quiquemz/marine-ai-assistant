@@ -152,6 +152,12 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
         marker.openPopup();
       }
     });
+    
+    // Auto-zoom to fit all highlighted sites
+    if (windSites.length > 0) {
+      const bounds = L.latLngBounds(windSites.map(site => site.coordinates));
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 8 });
+    }
   }, [windSites, onSiteSelect, highlightedSiteIds]);
 
   return (
