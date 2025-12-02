@@ -94,7 +94,7 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
 
   // Update markers when sites or highlighted IDs change
   useEffect(() => {
-    if (!mapRef.current || windSites.length === 0) return;
+    if (!mapRef.current) return;
 
     const map = mapRef.current;
     
@@ -104,6 +104,9 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
         map.removeLayer(layer);
       }
     });
+
+    // If no sites, just clear and return
+    if (windSites.length === 0) return;
 
     // Add markers for each wind site
     windSites.forEach((site) => {
