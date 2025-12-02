@@ -139,7 +139,7 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [], selectedSiteId }: 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const map = L.map(mapContainerRef.current).setView([54.0, 3.0], 5);
+    const map = L.map(mapContainerRef.current, { zoomControl: false }).setView([54.0, 3.0], 5);
     mapRef.current = map;
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
