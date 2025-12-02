@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import WindSiteMap from '@/components/WindSiteMap';
-import ChatInterface from '@/components/ChatInterface';
-import WindSitePriorityPanel from '@/components/WindSitePriorityPanel';
-import { Wind } from 'lucide-react';
-import type { WindSite } from '@/data/windSiteData';
+import { useState } from "react";
+import WindSiteMap from "@/components/WindSiteMap";
+import ChatInterface from "@/components/ChatInterface";
+import WindSitePriorityPanel from "@/components/WindSitePriorityPanel";
+import { Wind } from "lucide-react";
+import type { WindSite } from "@/data/windSiteData";
 
 const Index = () => {
   const [selectedHotspot, setSelectedHotspot] = useState<string>();
@@ -32,9 +32,7 @@ const Index = () => {
               <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Viento
               </h1>
-              <p className="text-xs text-muted-foreground">
-                Floating Offshore Wind Planning Copilot
-              </p>
+              <p className="text-xs text-muted-foreground">Offshore Wind Farm Planning Copilot</p>
             </div>
           </div>
         </div>
@@ -45,16 +43,13 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-120px)]">
           {/* Left Column - Chat */}
           <div className="lg:col-span-1 h-full min-h-[400px]">
-            <ChatInterface 
-              selectedHotspot={selectedHotspot} 
-              onHighlightSites={handleHighlightSites}
-            />
+            <ChatInterface selectedHotspot={selectedHotspot} onHighlightSites={handleHighlightSites} />
           </div>
 
           {/* Center Column - Map */}
           <div className="lg:col-span-2 h-full min-h-[400px]">
-            <WindSiteMap 
-              onSiteSelect={handleSiteSelect} 
+            <WindSiteMap
+              onSiteSelect={handleSiteSelect}
               highlightedSiteIds={highlightedSiteIds}
               selectedSiteId={selectedSiteId}
             />
@@ -62,10 +57,7 @@ const Index = () => {
 
           {/* Right Column - Search Results */}
           <div className="lg:col-span-1 h-full min-h-[400px] overflow-auto">
-            <WindSitePriorityPanel 
-              onSiteSelect={handleSiteSelect}
-              highlightedSiteIds={highlightedSiteIds}
-            />
+            <WindSitePriorityPanel onSiteSelect={handleSiteSelect} highlightedSiteIds={highlightedSiteIds} />
           </div>
         </div>
       </main>
