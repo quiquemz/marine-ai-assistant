@@ -18,16 +18,21 @@ export type Database = {
         Row: {
           bird_migration_risk: string
           capacity_factor: number
+          capex_eur_m_per_mw: number | null
           coordinates: number[]
           country: string
           created_at: string | null
+          distance_to_grid_km: number | null
+          distance_to_port_km: number | null
           environmental_impact: string
           estimated_capacity: string
           feasibility: string
           id: string
+          indicative_lcoe_eur_mwh: number | null
           last_assessment: string
           location: string
           name: string
+          nearest_project: string | null
           overall_score: number
           sea_floor_impact: string
           updated_at: string | null
@@ -37,16 +42,21 @@ export type Database = {
         Insert: {
           bird_migration_risk: string
           capacity_factor: number
+          capex_eur_m_per_mw?: number | null
           coordinates: number[]
           country: string
           created_at?: string | null
+          distance_to_grid_km?: number | null
+          distance_to_port_km?: number | null
           environmental_impact: string
           estimated_capacity: string
           feasibility: string
           id: string
+          indicative_lcoe_eur_mwh?: number | null
           last_assessment: string
           location: string
           name: string
+          nearest_project?: string | null
           overall_score: number
           sea_floor_impact: string
           updated_at?: string | null
@@ -56,16 +66,21 @@ export type Database = {
         Update: {
           bird_migration_risk?: string
           capacity_factor?: number
+          capex_eur_m_per_mw?: number | null
           coordinates?: number[]
           country?: string
           created_at?: string | null
+          distance_to_grid_km?: number | null
+          distance_to_port_km?: number | null
           environmental_impact?: string
           estimated_capacity?: string
           feasibility?: string
           id?: string
+          indicative_lcoe_eur_mwh?: number | null
           last_assessment?: string
           location?: string
           name?: string
+          nearest_project?: string | null
           overall_score?: number
           sea_floor_impact?: string
           updated_at?: string | null
