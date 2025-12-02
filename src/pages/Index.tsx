@@ -50,7 +50,10 @@ const Index = () => {
               />
             </div>
             <div className="flex-shrink-0">
-              <WindSitePriorityPanel onSiteSelect={handleSiteSelect} />
+              <WindSitePriorityPanel 
+                onSiteSelect={handleSiteSelect}
+                highlightedSiteIds={highlightedSiteIds}
+              />
             </div>
           </div>
 

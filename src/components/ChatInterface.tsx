@@ -30,6 +30,9 @@ const ChatInterface = ({ selectedHotspot, onHighlightSites }: ChatInterfaceProps
   const handleReset = () => {
     setMessages([initialMessage]);
     setInput('');
+    if (onHighlightSites) {
+      onHighlightSites([]);
+    }
     toast.success('Chat conversation reset');
   };
 
