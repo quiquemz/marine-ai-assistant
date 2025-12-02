@@ -39,28 +39,28 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-140px)]">
-          {/* Left Column - Chat + Priority */}
-          <div className="lg:col-span-1 flex flex-col gap-6 h-full">
-            <div className="flex-1 min-h-0">
-              <ChatInterface 
-                selectedHotspot={selectedHotspot} 
-                onHighlightSites={handleHighlightSites}
-              />
-            </div>
-            <div className="flex-shrink-0">
-              <WindSitePriorityPanel 
-                onSiteSelect={handleSiteSelect}
-                highlightedSiteIds={highlightedSiteIds}
-              />
-            </div>
+      <main className="container mx-auto px-4 py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-120px)]">
+          {/* Left Column - Chat */}
+          <div className="lg:col-span-1 h-full min-h-[400px]">
+            <ChatInterface 
+              selectedHotspot={selectedHotspot} 
+              onHighlightSites={handleHighlightSites}
+            />
           </div>
 
-          {/* Right Column - Map */}
-          <div className="lg:col-span-2 h-full min-h-[500px]">
+          {/* Center Column - Map */}
+          <div className="lg:col-span-2 h-full min-h-[400px]">
             <WindSiteMap 
               onSiteSelect={handleSiteSelect} 
+              highlightedSiteIds={highlightedSiteIds}
+            />
+          </div>
+
+          {/* Right Column - Search Results */}
+          <div className="lg:col-span-1 h-full min-h-[400px] overflow-auto">
+            <WindSitePriorityPanel 
+              onSiteSelect={handleSiteSelect}
               highlightedSiteIds={highlightedSiteIds}
             />
           </div>

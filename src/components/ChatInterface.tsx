@@ -117,7 +117,7 @@ const ChatInterface = ({ selectedHotspot, onHighlightSites }: ChatInterfaceProps
   };
 
   return (
-    <Card className="flex flex-col h-full max-h-[800px] bg-card/95 backdrop-blur">
+    <Card className="flex flex-col h-full bg-card/95 backdrop-blur">
       <div className="p-4 border-b border-border bg-primary/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
