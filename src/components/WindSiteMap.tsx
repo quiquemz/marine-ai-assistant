@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { windSiteData, getFeasibilityColor, type WindSite } from '@/data/windSiteData';
+import { getFeasibilityColor, type WindSite } from '@/data/windSiteData';
 import { Card } from './ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 // Fix for default marker icon
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -24,9 +25,46 @@ interface WindSiteMapProps {
 const WindSiteMap = ({ onSiteSelect }: WindSiteMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const [windSites, setWindSites] = useState<WindSite[]>([]);
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+    const fetchWindSites = async () => {
+      const { data, error } = await supabase
+        .from('wind_sites')
+        .select('*')
+        .order('overall_score', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching wind sites:', error);
+        return;
+      }
+      
+      // Transform database format to WindSite format
+      const sites: WindSite[] = data.map(site => ({
+        id: site.id,
+        name: site.name,
+        coordinates: site.coordinates as [number, number],
+        capacityFactor: site.capacity_factor,
+        waterDepth: site.water_depth,
+        feasibility: site.feasibility as 'excellent' | 'good' | 'moderate' | 'challenging',
+        environmentalImpact: site.environmental_impact as 'low' | 'medium' | 'high' | 'critical',
+        birdMigrationRisk: site.bird_migration_risk as 'low' | 'medium' | 'high',
+        whaleMigrationRisk: site.whale_migration_risk as 'low' | 'medium' | 'high',
+        seaFloorImpact: site.sea_floor_impact as 'low' | 'medium' | 'high',
+        overallScore: site.overall_score,
+        lastAssessment: site.last_assessment,
+        estimatedCapacity: site.estimated_capacity,
+        country: site.country
+      }));
+      
+      setWindSites(sites);
+    };
+    
+    fetchWindSites();
+  }, []);
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current || windSites.length === 0) return;
 
     // Initialize map centered on European seas
     const map = L.map(mapContainerRef.current).setView([54.0, 3.0], 5);
@@ -40,7 +78,7 @@ const WindSiteMap = ({ onSiteSelect }: WindSiteMapProps) => {
     }).addTo(map);
 
     // Add markers for each wind site
-    windSiteData.forEach((site) => {
+    windSites.forEach((site) => {
       const color = getFeasibilityColor(site.feasibility);
       
       const customIcon = L.divIcon({
@@ -127,7 +165,7 @@ const WindSiteMap = ({ onSiteSelect }: WindSiteMapProps) => {
         mapRef.current = null;
       }
     };
-  }, [onSiteSelect]);
+  }, [windSites, onSiteSelect]);
 
   return (
     <Card className="h-full overflow-hidden">
