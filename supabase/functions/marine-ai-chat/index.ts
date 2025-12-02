@@ -78,10 +78,14 @@ serve(async (req) => {
         for (const toolCall of message.tool_calls) {
           const toolResult = await handleToolCall(toolCall);
           
-          // Extract site IDs from search_sites tool results (limit to 5)
-          if (toolCall.function.name === "search_sites" && Array.isArray(toolResult)) {
-            const siteIds = toolResult.slice(0, 5).map((site: any) => site.id);
-            highlightedSiteIds = siteIds;
+          // Extract site IDs from highlight_sites_on_map tool
+          if (toolCall.function.name === "highlight_sites_on_map" && toolResult && typeof toolResult === 'object' && !Array.isArray(toolResult)) {
+            const result = toolResult as { action?: string; site_ids?: string[] };
+            if (result.action === "clear") {
+              highlightedSiteIds = [];
+            } else if (result.site_ids) {
+              highlightedSiteIds = result.site_ids;
+            }
           }
           
           conversationMessages.push({

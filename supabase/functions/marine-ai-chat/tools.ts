@@ -95,4 +95,33 @@ export const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "highlight_sites_on_map",
+      description: "Display specific sites on the map. Use this after searching, getting details, or comparing sites to show them to the user. Can also be used to clear the map.",
+      parameters: {
+        type: "object",
+        properties: {
+          site_ids: {
+            type: "array",
+            items: { type: "string" },
+            description: "List of site IDs to highlight on the map",
+          },
+          action: {
+            type: "string",
+            enum: ["highlight", "clear"],
+            description: "Action to perform: 'highlight' to show sites, 'clear' to remove all highlights",
+            default: "highlight",
+          },
+          zoom_to_fit: {
+            type: "boolean",
+            description: "Whether to automatically zoom the map to fit all highlighted sites",
+            default: true,
+          },
+        },
+        required: ["site_ids"],
+      },
+    },
+  },
 ];

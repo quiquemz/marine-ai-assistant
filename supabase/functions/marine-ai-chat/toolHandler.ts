@@ -26,6 +26,8 @@ export async function handleToolCall(toolCall: ToolCall) {
       return await getSiteDetails(args);
     case "compare_sites":
       return await compareSites(args);
+    case "highlight_sites_on_map":
+      return await highlightSitesOnMap(args);
     default:
       return { error: `Unknown tool: ${name}` };
   }
@@ -174,6 +176,33 @@ async function compareSites(args: any) {
       whale_migration_risk: site.whale_migration_risk,
       overall_score: site.overall_score
     })),
-    focus_criteria
+    focus_criteria,
+    site_ids: sites.map((site: any) => site.id)
+  };
+}
+
+async function highlightSitesOnMap(args: any) {
+  const { site_ids, action = "highlight", zoom_to_fit = true } = args;
+  
+  if (action === "clear") {
+    return { action: "clear", site_ids: [], zoom_to_fit: false };
+  }
+  
+  // Validate site IDs exist in database
+  const { data: sites, error } = await supabase
+    .from('wind_sites')
+    .select('id, name, coordinates')
+    .in('id', site_ids);
+  
+  if (error || !sites) {
+    console.error('Failed to validate site IDs:', error);
+    return { error: "Failed to validate site IDs" };
+  }
+  
+  return {
+    action: "highlight",
+    site_ids: sites.map(s => s.id),
+    sites_found: sites.length,
+    zoom_to_fit
   };
 }
