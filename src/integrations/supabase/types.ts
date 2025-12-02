@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      wind_sites: {
+        Row: {
+          bird_migration_risk: string
+          capacity_factor: number
+          coordinates: number[]
+          country: string
+          created_at: string | null
+          environmental_impact: string
+          estimated_capacity: string
+          feasibility: string
+          id: string
+          last_assessment: string
+          location: string
+          name: string
+          overall_score: number
+          sea_floor_impact: string
+          updated_at: string | null
+          water_depth: number
+          whale_migration_risk: string
+        }
+        Insert: {
+          bird_migration_risk: string
+          capacity_factor: number
+          coordinates: number[]
+          country: string
+          created_at?: string | null
+          environmental_impact: string
+          estimated_capacity: string
+          feasibility: string
+          id: string
+          last_assessment: string
+          location: string
+          name: string
+          overall_score: number
+          sea_floor_impact: string
+          updated_at?: string | null
+          water_depth: number
+          whale_migration_risk: string
+        }
+        Update: {
+          bird_migration_risk?: string
+          capacity_factor?: number
+          coordinates?: number[]
+          country?: string
+          created_at?: string | null
+          environmental_impact?: string
+          estimated_capacity?: string
+          feasibility?: string
+          id?: string
+          last_assessment?: string
+          location?: string
+          name?: string
+          overall_score?: number
+          sea_floor_impact?: string
+          updated_at?: string | null
+          water_depth?: number
+          whale_migration_risk?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
