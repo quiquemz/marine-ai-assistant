@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Message {
@@ -16,15 +16,21 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: 'Hello! I\'m your Floating Offshore Wind Planning Copilot for European seas. I can help you analyze potential wind farm sites, assess feasibility, evaluate environmental impacts, and guide your decision-making. How can I assist you today?'
-    }
-  ]);
+  const initialMessage: Message = {
+    role: 'assistant',
+    content: 'Hello! I\'m your Floating Offshore Wind Planning Copilot for European seas. I can help you analyze potential wind farm sites, assess feasibility, evaluate environmental impacts, and guide your decision-making. How can I assist you today?'
+  };
+  
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleReset = () => {
+    setMessages([initialMessage]);
+    setInput('');
+    toast.success('Chat conversation reset');
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -138,11 +144,22 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
   };
 
   return (
-    <Card className="flex flex-col h-full bg-card/95 backdrop-blur">
+    <Card className="flex flex-col h-full max-h-[800px] bg-card/95 backdrop-blur">
       <div className="p-4 border-b border-border bg-primary/5">
-        <div className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold text-lg">Wind Planning Copilot</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bot className="w-5 h-5 text-primary" />
+            <h2 className="font-semibold text-lg">Wind Planning Copilot</h2>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            className="h-8 w-8 p-0"
+            title="Reset conversation"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
           Ask about wind sites, feasibility, environmental trade-offs, or recommendations

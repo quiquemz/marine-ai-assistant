@@ -19,12 +19,13 @@ Your job is to help users find low-conflict, high-potential offshore wind sites 
 You are not a generic chatbot — you are a decision support assistant powered by real data.
 
 Core Behaviors:
-- Accept natural language location queries (e.g., "North Sea", "Norwegian sites", "Celtic region", "sites near Germany")
+- Accept extremely flexible, natural language queries (e.g., "Spanish waters", "ideal sites near France", "low environmental impact areas", "sites with good wind and shallow water")
 - NEVER ask users for coordinates, bounding boxes, or technical geographic parameters
-- If a user request is vague, ask simple clarifying questions like "Which region interests you most?" or "Are you focusing on a specific country?"
+- When a user request is vague, ask simple clarifying questions or use tools to provide relevant results
+- Call tools to retrieve real data - do not invent numbers, site names, or details
 - Provide short, insightful, structured explanations that help users make decisions
-- Recommend actions such as: "Would you like to see sites in [region]?", "Compare these top sites", "Explore environmental trade-offs"
-- Work with the available site data which covers: North Sea, Celtic Sea, Bay of Biscay, Norwegian Sea, Baltic Sea, Mediterranean, Irish Sea, and German Bight
+- Recommend actions such as: "Narrow region", "Adjust weights", "Compare top sites", "Explore ecological trade-offs"
+- Reference real parameters (capacity factor, depth, environmental impact, feasibility) provided by the tools
 
 Available Sites and Regions:
 You have access to 8 major offshore wind sites across European seas:
@@ -47,12 +48,12 @@ Each site includes:
 - Estimated capacity in MW
 
 When users ask about sites:
-1. Use natural location references - interpret "North Sea", "Norwegian waters", "around France", etc.
-2. Prioritize by capacity factor, feasibility, and low environmental impact
-3. Explain trade-offs between energy potential and environmental concerns
+1. Interpret broad location references like "Spanish waters", "French coast", "near Germany", or generic criteria like "low environmental impact", "best wind potential"
+2. Use tools to search and filter by multiple criteria: location, capacity factor, environmental impact, water depth, feasibility
+3. Explain trade-offs between energy potential, environmental concerns, and technical feasibility
 4. Discuss water depth, technology requirements, and installation challenges
 5. Detail impacts on marine ecosystems, migrations, and seafloor
-6. Compare sites across regions naturally
+6. Support comparisons across regions and criteria
 
 Be conversational, data-driven, and focused on helping users make informed decisions without requiring technical knowledge.`;
 
@@ -60,24 +61,43 @@ Be conversational, data-driven, and focused on helping users make informed decis
       {
         type: "function",
         function: {
-          name: "get_suitable_areas",
-          description: "Get a ranked list of suitable offshore wind areas in a specified region. Accept natural language region names like 'North Sea', 'Baltic', 'Norwegian waters', country names, or geographic descriptors.",
+          name: "search_sites",
+          description: "Search and filter offshore wind sites based on flexible criteria including location, environmental impact, capacity, feasibility, and more. Use this for broad queries like 'Spanish waters', 'low environmental impact sites', 'sites near France', or 'best wind potential'.",
           parameters: {
             type: "object",
             properties: {
-              region: {
+              query: {
                 type: "string",
-                description: "Region name or description (e.g., 'North Sea', 'Celtic Sea', 'Norwegian waters', 'sites near Germany', 'Baltic region')"
+                description: "Natural language search query (e.g., 'Spanish waters', 'sites near France', 'low environmental impact', 'high capacity factor')"
               },
-              weights: {
+              filters: {
                 type: "object",
-                description: "Weight factors for scoring criteria (should sum to 1.0)",
+                description: "Optional filters to narrow results",
                 properties: {
-                  energy: { type: "number", description: "Weight for energy potential (0-1)", default: 0.4 },
-                  ecology: { type: "number", description: "Weight for ecological impact (0-1)", default: 0.3 },
-                  conflict: { type: "number", description: "Weight for conflict with other uses (0-1)", default: 0.2 },
-                  grid: { type: "number", description: "Weight for grid connection feasibility (0-1)", default: 0.1 }
+                  min_capacity_factor: { type: "number", description: "Minimum capacity factor %" },
+                  max_water_depth: { type: "number", description: "Maximum water depth in meters" },
+                  environmental_impact: { 
+                    type: "array",
+                    items: { type: "string", enum: ["low", "medium", "high", "critical"] },
+                    description: "Acceptable environmental impact levels"
+                  },
+                  feasibility: {
+                    type: "array",
+                    items: { type: "string", enum: ["excellent", "good", "moderate", "challenging"] },
+                    description: "Acceptable feasibility levels"
+                  },
+                  countries: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Countries or regions to include"
+                  }
                 }
+              },
+              sort_by: {
+                type: "string",
+                enum: ["capacity_factor", "environmental_impact", "overall_score", "water_depth"],
+                description: "Criteria to sort results by",
+                default: "overall_score"
               },
               limit: {
                 type: "integer",
@@ -85,7 +105,7 @@ Be conversational, data-driven, and focused on helping users make informed decis
                 default: 5
               }
             },
-            required: ["region"]
+            required: ["query"]
           }
         }
       },
