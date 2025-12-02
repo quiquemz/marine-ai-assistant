@@ -1,14 +1,53 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getPrioritySites, type WindSite } from '@/data/windSiteData';
+import { type WindSite } from '@/data/windSiteData';
 import { Wind, TrendingUp, Anchor } from 'lucide-react';
 import { Badge } from './ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WindSitePriorityPanelProps {
   onSiteSelect?: (site: WindSite) => void;
 }
 
 const WindSitePriorityPanel = ({ onSiteSelect }: WindSitePriorityPanelProps) => {
-  const prioritySites = getPrioritySites();
+  const [prioritySites, setPrioritySites] = useState<WindSite[]>([]);
+
+  useEffect(() => {
+    const fetchPrioritySites = async () => {
+      const { data, error } = await supabase
+        .from('wind_sites')
+        .select('*')
+        .order('overall_score', { ascending: false })
+        .limit(3);
+      
+      if (error) {
+        console.error('Error fetching priority sites:', error);
+        return;
+      }
+      
+      // Transform database format to WindSite format
+      const sites: WindSite[] = data.map(site => ({
+        id: site.id,
+        name: site.name,
+        coordinates: site.coordinates as [number, number],
+        capacityFactor: site.capacity_factor,
+        waterDepth: site.water_depth,
+        feasibility: site.feasibility as 'excellent' | 'good' | 'moderate' | 'challenging',
+        environmentalImpact: site.environmental_impact as 'low' | 'medium' | 'high' | 'critical',
+        birdMigrationRisk: site.bird_migration_risk as 'low' | 'medium' | 'high',
+        whaleMigrationRisk: site.whale_migration_risk as 'low' | 'medium' | 'high',
+        seaFloorImpact: site.sea_floor_impact as 'low' | 'medium' | 'high',
+        overallScore: site.overall_score,
+        lastAssessment: site.last_assessment,
+        estimatedCapacity: site.estimated_capacity,
+        country: site.country
+      }));
+      
+      setPrioritySites(sites);
+    };
+    
+    fetchPrioritySites();
+  }, []);
 
   const getFeasibilityBadgeVariant = (feasibility: string) => {
     switch (feasibility) {
