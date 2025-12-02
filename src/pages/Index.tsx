@@ -7,9 +7,14 @@ import type { WindSite } from '@/data/windSiteData';
 
 const Index = () => {
   const [selectedHotspot, setSelectedHotspot] = useState<string>();
+  const [highlightedSiteIds, setHighlightedSiteIds] = useState<string[]>([]);
 
   const handleSiteSelect = (site: WindSite) => {
     setSelectedHotspot(site.name);
+  };
+
+  const handleHighlightSites = (siteIds: string[]) => {
+    setHighlightedSiteIds(siteIds);
   };
 
   return (
@@ -39,7 +44,10 @@ const Index = () => {
           {/* Left Column - Chat + Priority */}
           <div className="lg:col-span-1 flex flex-col gap-6 h-full">
             <div className="flex-1 min-h-0">
-              <ChatInterface selectedHotspot={selectedHotspot} />
+              <ChatInterface 
+                selectedHotspot={selectedHotspot} 
+                onHighlightSites={handleHighlightSites}
+              />
             </div>
             <div className="flex-shrink-0">
               <WindSitePriorityPanel onSiteSelect={handleSiteSelect} />
@@ -48,7 +56,10 @@ const Index = () => {
 
           {/* Right Column - Map */}
           <div className="lg:col-span-2 h-full min-h-[500px]">
-            <WindSiteMap onSiteSelect={handleSiteSelect} />
+            <WindSiteMap 
+              onSiteSelect={handleSiteSelect} 
+              highlightedSiteIds={highlightedSiteIds}
+            />
           </div>
         </div>
       </main>

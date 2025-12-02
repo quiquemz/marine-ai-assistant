@@ -13,9 +13,10 @@ interface Message {
 
 interface ChatInterfaceProps {
   selectedHotspot?: string;
+  onHighlightSites?: (siteIds: string[]) => void;
 }
 
-const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
+const ChatInterface = ({ selectedHotspot, onHighlightSites }: ChatInterfaceProps) => {
   const initialMessage: Message = {
     role: 'assistant',
     content: 'Hello! I\'m your Floating Offshore Wind Planning Copilot for European seas. I can help you analyze potential wind farm sites, assess feasibility, evaluate environmental impacts, and guide your decision-making. How can I assist you today?'
@@ -77,6 +78,11 @@ const ChatInterface = ({ selectedHotspot }: ChatInterfaceProps) => {
       
       if (data.content) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.content }]);
+        
+        // Highlight sites on map if IDs are returned
+        if (data.highlightedSiteIds && onHighlightSites) {
+          onHighlightSites(data.highlightedSiteIds);
+        }
       } else if (data.error) {
         toast.error(data.error);
       }

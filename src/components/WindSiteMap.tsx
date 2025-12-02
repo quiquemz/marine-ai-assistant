@@ -20,9 +20,10 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface WindSiteMapProps {
   onSiteSelect?: (site: WindSite) => void;
+  highlightedSiteIds?: string[];
 }
 
-const WindSiteMap = ({ onSiteSelect }: WindSiteMapProps) => {
+const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const [windSites, setWindSites] = useState<WindSite[]>([]);
@@ -77,79 +78,58 @@ const WindSiteMap = ({ onSiteSelect }: WindSiteMapProps) => {
       maxZoom: 20,
     }).addTo(map);
 
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [windSites]);
+
+  // Update markers when sites or highlighted IDs change
+  useEffect(() => {
+    if (!mapRef.current || windSites.length === 0) return;
+
+    const map = mapRef.current;
+    
+    // Clear existing markers
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker) {
+        map.removeLayer(layer);
+      }
+    });
+
     // Add markers for each wind site
     windSites.forEach((site) => {
       const color = getFeasibilityColor(site.feasibility);
+      const isHighlighted = highlightedSiteIds.includes(site.id);
       
       const customIcon = L.divIcon({
         className: 'custom-marker',
         html: `<div style="
           background-color: ${color};
-          width: 24px;
-          height: 24px;
+          width: ${isHighlighted ? '32px' : '24px'};
+          height: ${isHighlighted ? '32px' : '24px'};
           border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        "></div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
+          border: ${isHighlighted ? '4px solid #f59e0b' : '3px solid white'};
+          box-shadow: ${isHighlighted ? '0 0 20px rgba(245, 158, 11, 0.6), 0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.3)'};
+          transition: all 0.3s ease;
+          ${isHighlighted ? 'animation: pulse 2s ease-in-out infinite;' : ''}
+        "></div>
+        ${isHighlighted ? `<style>
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+          }
+        </style>` : ''}`,
+        iconSize: [isHighlighted ? 32 : 24, isHighlighted ? 32 : 24],
+        iconAnchor: [isHighlighted ? 16 : 12, isHighlighted ? 16 : 12],
       });
 
       const marker = L.marker(site.coordinates, { icon: customIcon })
         .addTo(map)
         .bindPopup(`
-          <div style="min-width: 280px;">
-            <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #1e293b;">
-              ${site.name}
-            </h3>
-            <div style="display: grid; gap: 6px; font-size: 14px;">
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748b;">Country:</span>
-                <span style="font-weight: 600;">${site.country}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748b;">Capacity Factor:</span>
-                <span style="font-weight: 600; color: #059669;">${site.capacityFactor}%</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748b;">Water Depth:</span>
-                <span style="font-weight: 600;">${site.waterDepth}m</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748b;">Feasibility:</span>
-                <span style="font-weight: 600; text-transform: capitalize;">${site.feasibility}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748b;">Environmental Impact:</span>
-                <span style="font-weight: 600; text-transform: capitalize;">${site.environmentalImpact}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748b;">Overall Score:</span>
-                <span style="font-weight: 600; color: #0891b2;">${site.overallScore}/100</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748b;">Est. Capacity:</span>
-                <span style="font-weight: 600;">${site.estimatedCapacity}</span>
-              </div>
-              <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0;">
-                <div style="font-size: 13px; color: #64748b;">Environmental Risks:</div>
-                <div style="display: grid; gap: 4px; margin-top: 4px; font-size: 13px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span>Bird Migration:</span>
-                    <span style="text-transform: capitalize;">${site.birdMigrationRisk}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span>Whale Migration:</span>
-                    <span style="text-transform: capitalize;">${site.whaleMigrationRisk}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span>Seafloor Impact:</span>
-                    <span style="text-transform: capitalize;">${site.seaFloorImpact}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+...
         `);
 
       marker.on('click', () => {
@@ -157,15 +137,13 @@ const WindSiteMap = ({ onSiteSelect }: WindSiteMapProps) => {
           onSiteSelect(site);
         }
       });
-    });
 
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
+      // Auto-open popup for highlighted sites
+      if (isHighlighted) {
+        marker.openPopup();
       }
-    };
-  }, [windSites, onSiteSelect]);
+    });
+  }, [windSites, onSiteSelect, highlightedSiteIds]);
 
   return (
     <Card className="h-full overflow-hidden">

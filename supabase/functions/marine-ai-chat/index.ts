@@ -20,6 +20,7 @@ serve(async (req) => {
     let continueLoop = true;
     let loopCount = 0;
     const MAX_LOOPS = 5;
+    let highlightedSiteIds: string[] = [];
 
     while (continueLoop && loopCount < MAX_LOOPS) {
       loopCount++;
@@ -76,6 +77,13 @@ serve(async (req) => {
         
         for (const toolCall of message.tool_calls) {
           const toolResult = await handleToolCall(toolCall);
+          
+          // Extract site IDs from search_sites tool results (limit to 5)
+          if (toolCall.function.name === "search_sites" && Array.isArray(toolResult)) {
+            const siteIds = toolResult.slice(0, 5).map((site: any) => site.id);
+            highlightedSiteIds = siteIds;
+          }
+          
           conversationMessages.push({
             role: "tool",
             tool_call_id: toolCall.id,
@@ -86,7 +94,8 @@ serve(async (req) => {
         continueLoop = false;
         
         return new Response(JSON.stringify({ 
-          content: message.content || "I apologize, but I couldn't generate a response. Please try again." 
+          content: message.content || "I apologize, but I couldn't generate a response. Please try again.",
+          highlightedSiteIds: highlightedSiteIds.length > 0 ? highlightedSiteIds : undefined
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
