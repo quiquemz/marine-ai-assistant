@@ -21,11 +21,13 @@ L.Marker.prototype.options.icon = DefaultIcon;
 interface WindSiteMapProps {
   onSiteSelect?: (site: WindSite) => void;
   highlightedSiteIds?: string[];
+  selectedSiteId?: string;
 }
 
-const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps) => {
+const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [], selectedSiteId }: WindSiteMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const [windSites, setWindSites] = useState<WindSite[]>([]);
 
   useEffect(() => {
@@ -104,6 +106,7 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
         map.removeLayer(layer);
       }
     });
+    markersRef.current.clear();
 
     // If no sites, just clear and return
     if (windSites.length === 0) return;
@@ -161,10 +164,8 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
         }
       });
 
-      // Auto-open popup for highlighted sites
-      if (isHighlighted) {
-        marker.openPopup();
-      }
+      // Store marker reference for later access
+      markersRef.current.set(site.id, marker);
     });
     
     // Auto-zoom to fit all highlighted sites
@@ -173,6 +174,19 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 8 });
     }
   }, [windSites, onSiteSelect, highlightedSiteIds]);
+
+  // Handle selected site - zoom and open popup
+  useEffect(() => {
+    if (!mapRef.current || !selectedSiteId) return;
+    
+    const marker = markersRef.current.get(selectedSiteId);
+    const site = windSites.find(s => s.id === selectedSiteId);
+    
+    if (marker && site) {
+      mapRef.current.setView(site.coordinates, 7, { animate: true });
+      marker.openPopup();
+    }
+  }, [selectedSiteId, windSites]);
 
   return (
     <Card className="h-full overflow-hidden">
