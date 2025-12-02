@@ -14,68 +14,70 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const systemPrompt = `You are an expert "Floating Offshore Wind Planning Copilot" for European seas.
-Your job is to help users find low-conflict, high-potential offshore wind sites by querying the available tools and datasets, explaining trade-offs, and guiding decisions.
+Your job is to help users find low-conflict, high-potential offshore wind sites by analyzing data, explaining trade-offs, and guiding decisions.
 
 You are not a generic chatbot — you are a decision support assistant powered by real data.
 
 Core Behaviors:
-- When a user asks a question that requires data, call a tool instead of guessing
-- Do not invent numbers, site names, species, or coordinates
-- If a user request is vague, ask a clarifying question before running tools
+- Accept natural language location queries (e.g., "North Sea", "Norwegian sites", "Celtic region", "sites near Germany")
+- NEVER ask users for coordinates, bounding boxes, or technical geographic parameters
+- If a user request is vague, ask simple clarifying questions like "Which region interests you most?" or "Are you focusing on a specific country?"
 - Provide short, insightful, structured explanations that help users make decisions
-- Recommend actions such as: "Narrow region", "Adjust weights", "Compare top sites", "Explore ecological trade-offs"
-- Reference real parameters (wind, depth, conflict, ecology) provided by the tools
+- Recommend actions such as: "Would you like to see sites in [region]?", "Compare these top sites", "Explore environmental trade-offs"
+- Work with the available site data which covers: North Sea, Celtic Sea, Bay of Biscay, Norwegian Sea, Baltic Sea, Mediterranean, Irish Sea, and German Bight
 
-You have access to offshore wind site data including:
-- Location coordinates of potential wind farm sites across European seas
+Available Sites and Regions:
+You have access to 8 major offshore wind sites across European seas:
+- North Sea (UK, Germany, Norway)
+- Celtic Sea (UK)
+- Bay of Biscay (France)
+- Norwegian Sea (Norway)
+- Baltic Sea (Sweden)
+- Mediterranean - Gulf of Lion (France)
+- Irish Sea (Ireland)
+- German Bight (Germany)
+
+Each site includes:
 - Net capacity factor (wind energy potential, 0-100%)
-- Water depth and feasibility assessments (excellent, good, moderate, challenging)
-- Environmental impact assessments (low, medium, high, critical)
-- Bird migration risk levels
-- Whale migration risk levels
+- Water depth and feasibility (excellent, good, moderate, challenging)
+- Environmental impact (low, medium, high, critical)
+- Bird and whale migration risks
 - Seafloor impact assessments
 - Overall site scores (0-100)
 - Estimated capacity in MW
 
-When users ask about:
-1. Site recommendations - Prioritize based on capacity factor, feasibility, and low environmental impact
-2. Trade-off analysis - Explain conflicts between energy potential and environmental concerns
-3. Feasibility assessment - Discuss water depth, technology requirements, and installation challenges
-4. Environmental considerations - Detail impacts on marine ecosystems, bird/whale migrations, seafloor
-5. Regional comparisons - Compare sites across different European seas (North Sea, Baltic, Celtic, etc.)
+When users ask about sites:
+1. Use natural location references - interpret "North Sea", "Norwegian waters", "around France", etc.
+2. Prioritize by capacity factor, feasibility, and low environmental impact
+3. Explain trade-offs between energy potential and environmental concerns
+4. Discuss water depth, technology requirements, and installation challenges
+5. Detail impacts on marine ecosystems, migrations, and seafloor
+6. Compare sites across regions naturally
 
-Be precise, data-driven, and focus on helping users make informed decisions. Always consider the balance between energy generation potential and environmental sustainability.`;
+Be conversational, data-driven, and focused on helping users make informed decisions without requiring technical knowledge.`;
 
     const tools = [
       {
         type: "function",
         function: {
           name: "get_suitable_areas",
-          description: "Get a ranked list of suitable offshore wind areas in a specified region",
+          description: "Get a ranked list of suitable offshore wind areas in a specified region. Accept natural language region names like 'North Sea', 'Baltic', 'Norwegian waters', country names, or geographic descriptors.",
           parameters: {
             type: "object",
             properties: {
-              region_bbox: {
-                type: "object",
-                description: "Bounding box for the region (north, south, east, west coordinates)",
-                properties: {
-                  north: { type: "number" },
-                  south: { type: "number" },
-                  east: { type: "number" },
-                  west: { type: "number" }
-                },
-                required: ["north", "south", "east", "west"]
+              region: {
+                type: "string",
+                description: "Region name or description (e.g., 'North Sea', 'Celtic Sea', 'Norwegian waters', 'sites near Germany', 'Baltic region')"
               },
               weights: {
                 type: "object",
                 description: "Weight factors for scoring criteria (should sum to 1.0)",
                 properties: {
-                  energy: { type: "number", description: "Weight for energy potential (0-1)" },
-                  ecology: { type: "number", description: "Weight for ecological impact (0-1)" },
-                  conflict: { type: "number", description: "Weight for conflict with other uses (0-1)" },
-                  grid: { type: "number", description: "Weight for grid connection feasibility (0-1)" }
-                },
-                required: ["energy", "ecology", "conflict", "grid"]
+                  energy: { type: "number", description: "Weight for energy potential (0-1)", default: 0.4 },
+                  ecology: { type: "number", description: "Weight for ecological impact (0-1)", default: 0.3 },
+                  conflict: { type: "number", description: "Weight for conflict with other uses (0-1)", default: 0.2 },
+                  grid: { type: "number", description: "Weight for grid connection feasibility (0-1)", default: 0.1 }
+                }
               },
               limit: {
                 type: "integer",
@@ -83,7 +85,7 @@ Be precise, data-driven, and focus on helping users make informed decisions. Alw
                 default: 5
               }
             },
-            required: ["region_bbox", "weights"]
+            required: ["region"]
           }
         }
       },
@@ -91,82 +93,42 @@ Be precise, data-driven, and focus on helping users make informed decisions. Alw
         type: "function",
         function: {
           name: "get_site_details",
-          description: "Get detailed information about a specific offshore wind site",
+          description: "Get detailed information about a specific offshore wind site by name or ID",
           parameters: {
             type: "object",
             properties: {
-              site_id: {
+              site_identifier: {
                 type: "string",
-                description: "Unique identifier of the wind site"
+                description: "Site name or ID (e.g., 'Dogger Bank', 'Norwegian Sea', 'site-1')"
               }
             },
-            required: ["site_id"]
+            required: ["site_identifier"]
           }
         }
       },
       {
         type: "function",
         function: {
-          name: "run_scenario",
-          description: "Run a policy scenario to see how changes affect site suitability",
+          name: "compare_sites",
+          description: "Compare multiple offshore wind sites side-by-side",
           parameters: {
             type: "object",
             properties: {
-              region_bbox: {
-                type: "object",
-                description: "Bounding box for the region",
-                properties: {
-                  north: { type: "number" },
-                  south: { type: "number" },
-                  east: { type: "number" },
-                  west: { type: "number" }
+              site_identifiers: {
+                type: "array",
+                items: { type: "string" },
+                description: "List of site names or IDs to compare"
+              },
+              focus_criteria: {
+                type: "array",
+                items: { 
+                  type: "string",
+                  enum: ["energy", "environmental_impact", "feasibility", "cost", "ecology"]
                 },
-                required: ["north", "south", "east", "west"]
-              },
-              policy_changes: {
-                type: "object",
-                description: "Policy adjustments to apply",
-                properties: {
-                  mpa_expansion: { type: "number", description: "Marine protected area expansion factor (0-1)" },
-                  bird_priority: { type: "string", enum: ["low", "medium", "high"], description: "Priority level for bird protection" }
-                }
+                description: "Which criteria to emphasize in the comparison"
               }
             },
-            required: ["region_bbox", "policy_changes"]
-          }
-        }
-      },
-      {
-        type: "function",
-        function: {
-          name: "set_map_view",
-          description: "Update the map view to focus on a specific area",
-          parameters: {
-            type: "object",
-            properties: {
-              bounds: {
-                type: "object",
-                description: "Bounding box to fit in view",
-                properties: {
-                  north: { type: "number" },
-                  south: { type: "number" },
-                  east: { type: "number" },
-                  west: { type: "number" }
-                }
-              },
-              center: {
-                type: "object",
-                description: "Center point for the map",
-                properties: {
-                  lat: { type: "number" },
-                  lng: { type: "number" }
-                }
-              },
-              zoom: {
-                type: "number",
-                description: "Zoom level (1-20)"
-              }
-            }
+            required: ["site_identifiers"]
           }
         }
       }
