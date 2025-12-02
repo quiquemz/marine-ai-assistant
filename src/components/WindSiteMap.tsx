@@ -138,7 +138,21 @@ const WindSiteMap = ({ onSiteSelect, highlightedSiteIds = [] }: WindSiteMapProps
       const marker = L.marker(site.coordinates, { icon: customIcon })
         .addTo(map)
         .bindPopup(`
-...
+          <div style="min-width: 200px;">
+            <h3 style="font-weight: bold; margin-bottom: 8px; color: #1e3a5f;">${site.name}</h3>
+            <p style="font-size: 12px; color: #666; margin-bottom: 8px;">${site.country}</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px;">
+              <span style="color: #666;">Capacity Factor:</span>
+              <span style="font-weight: 600;">${site.capacityFactor}%</span>
+              <span style="color: #666;">Water Depth:</span>
+              <span style="font-weight: 600;">${site.waterDepth}m</span>
+              <span style="color: #666;">Feasibility:</span>
+              <span style="font-weight: 600; text-transform: capitalize;">${site.feasibility}</span>
+              <span style="color: #666;">Overall Score:</span>
+              <span style="font-weight: 600; color: #1e3a5f;">${site.overallScore}/100</span>
+            </div>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">${site.estimatedCapacity}</p>
+          </div>
         `);
 
       marker.on('click', () => {
