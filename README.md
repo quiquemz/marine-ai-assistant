@@ -1,6 +1,22 @@
-# Welcome to your Lovable project
+# Viento — Floating Offshore Wind Planning Copilot
 
-## Project info
+**Viento** is an AI-powered decision support tool for planning floating offshore wind farms across European seas. It helps energy developers, planners, and environmental analysts identify **low-conflict, high-potential** sites by combining real data on water depth, wind capacity, grid proximity, port access, CAPEX estimates, and environmental risk factors (whale/bird migration, seafloor impact).
+
+### Key Features
+
+- 🗺️ **Interactive Site Map** — Explore 1,000+ candidate sites across European waters with colour-coded feasibility markers and heatmap overlays for wind patterns, depth, and marine activity.
+- 🤖 **AI Chat Copilot** — Ask natural-language questions about sites, compare locations, and get data-driven recommendations powered by Gemini.
+- 📊 **Priority Panel** — Rank and filter sites by overall score, capacity factor, feasibility, and environmental impact.
+- 🎯 **Feasibility Breakdown** — Hover over any feasibility rating to see weighted component scores (depth, distance to port/grid, CAPEX, environmental).
+- 🌊 **Marine & Environmental Data** — Visualise whale migration corridors, bird flyways, shipping lanes, and protected areas.
+
+### Tech Stack
+
+- **Frontend:** React · TypeScript · Vite · Tailwind CSS · shadcn/ui · Leaflet
+- **Backend:** Lovable Cloud (Supabase) · Edge Functions
+- **AI:** Google Gemini via Lovable AI
+
+---
 
 **URL**: https://lovable.dev/projects/ac81818a-e5f4-4926-babf-ff96d4f3adaa
 
