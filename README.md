@@ -1,6 +1,6 @@
 # Floating Offshore Wind Planning Copilot
 
-**Viento** is an AI-powered decision support tool for planning floating offshore wind farms across European seas. It helps energy developers, planners, and environmental analysts identify **low-conflict, high-potential** sites by combining real data on water depth, wind capacity, grid proximity, port access, CAPEX estimates, and environmental risk factors (whale/bird migration, seafloor impact).
+An AI-powered decision support tool for planning floating offshore wind farms across European seas. It helps energy developers, planners, and environmental analysts identify **low-conflict, high-potential** sites by combining real data on water depth, wind capacity, grid proximity, port access, CAPEX estimates, and environmental risk factors (whale/bird migration, seafloor impact).
 
 ### Key Features
 
